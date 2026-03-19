@@ -14,9 +14,14 @@ const EsquemaReserva = z.object({
   servicioId: z.coerce.number({ message: "Debe seleccionar un servicio." }),
 });
 
+type EstadoReserva = {
+  errores: Record<string, string[] | undefined>;
+  mensaje: string;
+};
+
 // Crea una nueva reserva asociada a un servicio existente.
 // La fecha se convierte de string a objeto Date antes de guardarse en la base de datos.
-export async function crearReserva(_estadoPrevio: any, formData: FormData) {
+export async function crearReserva(_estadoPrevio: EstadoReserva, formData: FormData) {
   const campos = EsquemaReserva.safeParse({
     nombre: formData.get("nombre"),
     correo: formData.get("correo"),
@@ -27,7 +32,7 @@ export async function crearReserva(_estadoPrevio: any, formData: FormData) {
   // Si la validación falla, se retorna el objeto de errores al componente.
   if (!campos.success) {
     return {
-      errors: campos.error.flatten().fieldErrors,
+      errores: campos.error.flatten().fieldErrors,
       mensaje: "Error de validación.",
     };
   }

@@ -11,7 +11,12 @@ const EsquemaServicio = z.object({
   duracion: z.coerce.number().positive("La duración debe ser un número positivo"),
 });
 
-export async function crearServicio(_estadoPrevio: any, formData: FormData) {
+type EstadoServicio = {
+  errores: Record<string, string[] | undefined>;
+  mensaje: string;
+};
+
+export async function crearServicio(_estadoPrevio: EstadoServicio, formData: FormData) {
   const campos = EsquemaServicio.safeParse({
     nombre: formData.get("nombre"),
     descripcion: formData.get("descripcion"),
@@ -42,7 +47,7 @@ export async function eliminarServicio(id: number) {
     revalidatePath("/servicios");
 
     return { exito: true };
-  } catch (error) {
+  } catch {
     return {
       exito: false,
       mensaje: "No se pudo eliminar el servicio",
