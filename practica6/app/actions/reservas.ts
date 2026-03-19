@@ -37,6 +37,57 @@ export async function crearReserva(_estadoPrevio: EstadoReserva, formData: FormD
     };
   }
 
+  // Ejercicio complementario: Validación de disponibilidad
+  // Antes de crear la reserva, verificamos si ya existe otra reserva para el mismo
+  // servicio en un horario que se cruce, considerando la duración del servicio.
+  const servicio = await prisma.servicio.findUnique({
+    where: { id: campos.data.servicioId },
+  });
+
+  if (!servicio) {
+    return {
+      errores: {
+        servicioId: ["El servicio seleccionado no existe."],
+      },
+      mensaje: "Error de validación.",
+    };
+  }
+
+  const nuevaFechaInicio = new Date(campos.data.fecha);
+  const nuevaFechaFin = new Date(
+    nuevaFechaInicio.getTime() + servicio.duracion * 60_000
+  );
+
+  const reservasExistentes = await prisma.reserva.findMany({
+    where: {
+      servicioId: campos.data.servicioId,
+      // Opcional: ignorar reservas canceladas
+      NOT: { estado: "cancelada" },
+    },
+    include: {
+      servicio: true,
+    },
+  });
+
+  const hayConflicto = reservasExistentes.some((reserva) => {
+    const inicio = new Date(reserva.fecha);
+    const fin = new Date(
+      inicio.getTime() + reserva.servicio.duracion * 60_000
+    );
+
+    // Hay conflicto si los intervalos [inicio, fin) se solapan
+    return nuevaFechaInicio < fin && nuevaFechaFin > inicio;
+  });
+
+  if (hayConflicto) {
+    return {
+      errores: {
+        fecha: ["Ya existe una reserva para este servicio en ese horario."],
+      },
+      mensaje: "Conflicto de horario.",
+    };
+  }
+
   await prisma.reserva.create({
     data: {
       nombre: campos.data.nombre,
@@ -49,6 +100,7 @@ export async function crearReserva(_estadoPrevio: EstadoReserva, formData: FormD
   revalidatePath("/reservas");
   redirect("/reservas");
 }
+
 
 // Elimina una reserva por ID.
 // Retorna un objeto de resultado para que el componente pueda mostrar un error si falla.
