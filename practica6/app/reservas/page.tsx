@@ -1,12 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { BotonEliminarReserva } from "./boton-eliminar";
+import { BotonCancelarReserva } from "./boton-cancelar";
 import { tarjeta } from "@/app/lib/estilos";
+
 const etiquetaEstado: Record<string, string> = {
     pendiente: "bg-yellow-50 text-yellow-700 border-yellow-200",
     confirmada: "bg-green-50 text-green-700 border-green-200",
     cancelada: "bg-gray-100 text-gray-500 border-gray-200",
 };
+
 export default async function PaginaReservas() {
     const reservas = await prisma.reserva.findMany({
         orderBy: { fecha: "asc" },
@@ -48,6 +51,7 @@ transition-colors"
                                 </span>
                             </div>
                             <BotonEliminarReserva id={reserva.id} />
+                            <BotonCancelarReserva id={reserva.id} />
                         </li>
                     ))}
                 </ul>
