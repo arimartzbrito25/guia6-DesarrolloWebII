@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { BotonEliminarReserva } from "./boton-eliminar";
-import { BotonCancelarReserva } from "./boton-cancelar";
+import { BotonCancelarReserva } from "./boton-cancelar"; //Ej1
+import { BotonConfirmarReserva } from "./boton-confirmar"; //Ej2
 import { tarjeta } from "@/app/lib/estilos";
 
 const etiquetaEstado: Record<string, string> = {
@@ -52,6 +53,7 @@ transition-colors"
                             </div>
                             <BotonEliminarReserva id={reserva.id} />
                             <BotonCancelarReserva id={reserva.id} />
+                            <BotonConfirmarReserva id={reserva.id} />
                         </li>
                     ))}
                 </ul>

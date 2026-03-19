@@ -80,3 +80,22 @@ export async function cancelarReserva(id: number) {
     };
   }
 }
+
+//Ejercicio 2: Confirmar reservas
+export async function confirmarReserva(id: number) {
+  try {
+    await prisma.reserva.update({
+      where: { id },
+      data: { estado: "confirmada" },
+    });
+
+    revalidatePath("/reservas");
+
+    return { exito: true };
+  } catch (error) {
+    return {
+      exito: false,
+      mensaje: "No se pudo confirmar",
+    };
+  }
+}
